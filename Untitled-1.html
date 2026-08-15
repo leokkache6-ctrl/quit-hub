@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTA Rules & Commands Hub - QUIT</title>
+    <!-- ربط مكتبة الخلفية التفاعلية particles.js -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <style>
+        :root {
+            --bg-main: #060913;
+            --card-bg: #0b1120;
+            --border-color: #1e293b;
+            --accent-blue: #00a8ff;
+            --accent-glow: rgba(0, 168, 255, 0.3);
+            --text-main: #ffffff;
+            --text-muted: #8a99ad;
+            --danger-red: #ef4444;
+            --success-green: #22c55e;
+        }
+
+        [data-theme="purple-neon"] {
+            --accent-blue: #a855f7;
+            --accent-glow: rgba(168, 85, 247, 0.3);
+        }
+
+        [data-theme="matrix-green"] {
+            --accent-blue: #22c55e;
+            --accent-glow: rgba(34, 197, 94, 0.3);
+        }
+
+        [data-theme="amoled-black"] {
+            --bg-main: #000000;
+            --card-bg: #0a0a0a;
+            --border-color: #222222;
+            --accent-blue: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.3);
+        }
+
+        [data-theme="pure-white"] {
+            --bg-main: #f1f5f9;
+            --card-bg: #ffffff;
+            --border-color: #cbd5e1;
+            --accent-blue: #0284c7;
+            --accent-glow: rgba(2, 132, 199, 0.2);
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* --- WELCOME SCREEN --- */
+        #welcome-screen {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+            z-index: 2;
+        }
+
+        .welcome-title {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+        .welcome-title span { color: var(--accent-blue); }
+
+        .welcome-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, var(--accent-blue), #0055ff);
+            color: #fff;
+            font-size: 1.3rem;
+            font-weight: bold;
+            padding: 16px 45px;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px var(--accent-glow);
+        }
+        .btn-start:hover { transform: translateY(-3px); box-shadow: 0 15px 35px var(--accent-glow); }
+
+        /* --- MAIN DASHBOARD --- */
+        #main-app {
+            display: none;
+            flex-direction: column;
+            width: 90%;
+            max-width: 1100px;
+            margin: 30px auto;
+            flex-grow: 1;
+            position: relative;
+            z-index: 2;
+        }
+
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        /* --- THEME SELECTOR --- */
+        .theme-selector-wrapper {
+            position: relative;
+        }
+
+        .theme-dropdown-btn {
+            background: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 9px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .theme-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            width: 170px;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .theme-menu.show { display: flex; }
+
+        .theme-option {
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .theme-option:last-child { border-bottom: none; }
+        .theme-option:hover { background: rgba(255,255,255,0.05); }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: var(--card-bg);
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+        .tab-btn.active {
+            background: var(--accent-blue);
+            color: #fff;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 14px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-size: 1rem;
+            margin-bottom: 25px;
+            outline: none;
+        }
+        .search-box:focus { border-color: var(--accent-blue); box-shadow: 0 0 10px var(--accent-glow); }
+
+        /* --- CONTENT SECTIONS --- */
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 15px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-right: 4px solid var(--accent-blue);
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .command-card {
+            cursor: pointer;
+            user-select: none;
+        }
+        .command-card:hover {
+            border-color: var(--accent-blue);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px var(--accent-glow);
+            background: linear-gradient(135deg, var(--card-bg), rgba(0, 168, 255, 0.05));
+        }
+
+        .card-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: bold;
+            color: var(--accent-blue);
+        }
+
+        .fav-star {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            opacity: 0;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            padding: 4px;
+        }
+        .command-card:hover .fav-star,
+        .card:hover .fav-star,
+        .fav-star.active {
+            opacity: 1;
+        }
+        .fav-star:hover { transform: scale(1.2); }
+        .fav-star.active { color: #facc15; opacity: 1; }
+
+        .card-desc {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        /* --- SUB-COMMANDS SELECTION --- */
+        .sub-options-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            text-align: center;
+            gap: 20px;
+        }
+
+        .sub-options-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .sub-options-grid {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .sub-option-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 25px 35px;
+            cursor: pointer;
+            font-size: 1.15rem;
+            font-weight: bold;
+            color: var(--text-main);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            min-width: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .sub-option-card:hover {
+            border-color: var(--accent-blue);
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .back-to-sub-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            align-self: flex-start;
+            font-weight: bold;
+        }
+        .back-to-sub-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+
+        /* --- QUIZ SYSTEM STYLES --- */
+        .quiz-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .quiz-timer {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent-blue);
+            background: rgba(0, 168, 255, 0.1);
+            padding: 6px 15px;
+            border-radius: 8px;
+        }
+        .quiz-timer.warning {
+            color: var(--danger-red);
+            background: rgba(239, 68, 68, 0.1);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: right;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--text-main);
+        }
+
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-main);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-size: 1rem;
+            outline: none;
+        }
+        .form-input:focus, .form-textarea:focus { border-color: var(--accent-blue); box-shadow: 0 0 10px var(--accent-glow); }
+        .form-textarea { resize: vertical; min-height: 120px; }
+
+        .quiz-question-text {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .quiz-options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .quiz-option-btn {
+            background: var(--bg-main);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 14px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            text-align: right;
+            font-weight: 500;
+        }
+        .quiz-option-btn:hover {
+            border-color: var(--accent-blue);
+            background: rgba(0, 168, 255, 0.05);
+        }
+        .quiz-option-btn.selected {
+            background: var(--accent-blue);
+            color: #fff;
+            border-color: var(--accent-blue);
+        }
+
+        .quiz-nav-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-main {
+            background: var(--accent-blue);
+            color: #fff;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        .btn-main:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        .btn-secondary:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+
+        .result-summary-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 25px;
+            margin-bottom: 15px;
+            text-align: right;
+        }
+        .result-item {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .result-item:last-child { border-bottom: none; }
+
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--accent-blue);
+            color: #000;
+            font-weight: bold;
+            padding: 12px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            font-size: 0.95rem;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: auto;
+            position: relative;
+            z-index: 2;
+        }
+    </style>
+</head>
+<body data-theme="cyber-blue">
+
+    <!-- حاوية الخلفية التفاعلية -->
+    <div id="particles-js" style="position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: 1;"></div>
+
+    <!-- WELCOME SCREEN -->
+    <div id="welcome-screen">
+        <h1 class="welcome-title">QUIT <span>HUB</span></h1>
+        <p class="welcome-subtitle">دليلك الشامل لجميع قوانين الـ Roleplay والأوامر الإدارية وأوامر اللاعبين واختبارات القبول بدقة كاملة.</p>
+        <button class="btn-start" onclick="startApp()">QUIT START</button>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="main-app">
+        <div class="app-header">
+            <div style="font-size: 1.5rem; font-weight: 900;">QUIT <span>MTA Guide</span></div>
+            <div class="header-controls">
+                <!-- THEME SELECTOR -->
+                <div class="theme-selector-wrapper">
+                    <button class="theme-dropdown-btn" onclick="toggleThemeMenu()">
+                        <span id="current-theme-icon">💙</span> <span id="current-theme-name">Cyber Blue</span> ▾
+                    </button>
+                    <div class="theme-menu" id="themeMenu">
+                        <div class="theme-option" onclick="setTheme('cyber-blue', '💙', 'Cyber Blue')">💙 Cyber Blue</div>
+                        <div class="theme-option" onclick="setTheme('purple-neon', '💜', 'Purple Neon')">💜 Purple Neon</div>
+                        <div class="theme-option" onclick="setTheme('matrix-green', '💚', 'Matrix Green')">💚 Matrix Green</div>
+                        <div class="theme-option" onclick="setTheme('amoled-black', '🖤', 'AMOLED Black')">🖤 AMOLED Black</div>
+                        <div class="theme-option" onclick="setTheme('pure-white', '🤍', 'Pure White')">🤍 Pure White</div>
+                    </div>
+                </div>
+
+                <!-- NAVIGATION TABS -->
+                <div class="nav-tabs">
+                    <button class="tab-btn active" onclick="switchTab('rules', this)">📜 القوانين الكاملة</button>
+                    <button class="tab-btn" onclick="switchTab('commands-hub', this)">⚙️ الأوامر</button>
+                    <button class="tab-btn" onclick="switchTab('quiz-hub', this)">📝 نظام الاختبارات</button>
+                    <button class="tab-btn" onclick="switchTab('favorites', this)">⭐ المفضلة</button>
+                </div>
+            </div>
+        </div>
+
+        <input type="text" class="search-box" id="searchInput" placeholder="ابحث عن قانون أو أمر (مثال: DM, /jail)..." onkeyup="filterAll()">
+
+        <!-- TAB 1: RULES -->
+        <div id="rules-section" class="content-section active">
+            <div class="grid-container" id="rules-grid"></div>
+        </div>
+
+        <!-- TAB 2: COMMANDS HUB -->
+        <div id="commands-hub-section" class="content-section">
+            <div id="commands-selector-view" class="sub-options-container">
+                <h2 class="sub-options-title">اختر قسم الأوامر</h2>
+                <div class="sub-options-grid">
+                    <div class="sub-option-card" onclick="openCommandSub('player')">
+                        <span>👤</span> أوامر اللاعبين
+                    </div>
+                    <div class="sub-option-card" onclick="openCommandSub('admin')">
+                        <span style="color: var(--accent-blue);">🛡️</span> الأوامر الإدارية الكاملة
+                    </div>
+                </div>
+            </div>
+
+            <!-- Player Commands View -->
+            <div id="player-commands-view" style="display: none;">
+                <button class="back-to-sub-btn" onclick="backToCommandsSelector()">← عودة للاختيارات</button>
+                <div class="grid-container" id="commands-grid"></div>
+            </div>
+
+            <!-- Admin Commands View -->
+            <div id="admin-commands-view" style="display: none;">
+                <button class="back-to-sub-btn" onclick="backToCommandsSelector()">← عودة للاختيارات</button>
+                <div class="grid-container" id="admin-grid"></div>
+            </div>
+        </div>
+
+        <!-- TAB 3: QUIZ HUB -->
+        <div id="quiz-hub-section" class="content-section">
+            <!-- Main Quiz Selector -->
+            <div id="quiz-main-selector" class="sub-options-container">
+                <h2 class="sub-options-title">اختر اختبار القبول</h2>
+                <div class="sub-options-grid">
+                    <div class="sub-option-card" onclick="selectQuizType('whitelist')">
+                        <span>🛡️</span> وايت ليست (Whitelist)
+                    </div>
+                    <div class="sub-option-card" onclick="selectQuizType('admin_select')">
+                        <span>📋</span> تقديم الإدارة
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Sub-Selector -->
+            <div id="admin-quiz-selector" class="sub-options-container" style="display: none;">
+                <button class="back-to-sub-btn" onclick="backToQuizMain()">← عودة</button>
+                <h2 class="sub-options-title">اختر رتبة التقديم الإداري</h2>
+                <div class="sub-options-grid">
+                    <div class="sub-option-card" onclick="startAdminQuiz('support')">
+                        <span>🎧</span> اختبار رتبة سبورت
+                    </div>
+                    <div class="sub-option-card" onclick="startAdminQuiz('other')">
+                        <span>⭐</span> رتبة أخري
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal Info Form Container -->
+            <div id="personal-info-container" style="display: none;"></div>
+
+            <!-- Active Quiz Container -->
+            <div id="active-quiz-container" style="display: none;"></div>
+
+            <!-- Quiz Result Container -->
+            <div id="quiz-result-container" style="display: none;"></div>
+        </div>
+
+        <!-- TAB 4: FAVORITES -->
+        <div id="favorites-section" class="content-section">
+            <div class="grid-container" id="favorites-grid"></div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast">تم نسخ الأمر بنجاح!</div>
+
+    <footer>
+        © 2026 Developed by M_SEIF | QUIT Project | All Rights Reserved
+    </footer>
+
+    <script>
+        // قائمة القوانين الكاملة بدون أي نقص
+        const rulesData = [
+            { id: "rule-DM", code: "DM", name: "القتل بدون سبب", desc: "قتل اللاعبين بدون وجود سبب أو سيناريو اربي كافي." },
+            { id: "rule-VDM", code: "VDM", name: "دعس اللاعبين بالسيارة", desc: "استخدام السيارة كسلاح لقتل أو صدم اللاعبين بدون اربي." },
+            { id: "rule-RDM", code: "RDM", name: "تكرار القتل دون توقف", desc: "قتل نفس الشخص باستمرار وبدون سبب وجيه." },
+            { id: "rule-LTA", code: "LTA", name: "الهروب من الاربي", desc: "الخروج من اللعبة أو الهروب أثناء تفاعل أو سيناريو اربي نشط." },
+            { id: "rule-MG", code: "MG", name: "التفريق بين الشاتين (MetaGaming)", desc: "خلط معلومات الـ OOC (الواقع الحقيقي) مع الـ IC (داخل اللعبة)." },
+            { id: "rule-PG", code: "PG", name: "فعل شيء خارق (PowerGaming)", desc: "القيام بأفعال مستحيلة في الواقع أو فرض أفعال على الآخرين دون إعطائهم فرصة." },
+            { id: "rule-PK", code: "PK", name: "فقدان الذاكرة بعد الموت", desc: "أن ينسى الشخص الذي مات حياته السابقة ولا يحاول الانتقام." },
+            { id: "rule-CK", code: "CK", name: "إعدام الشخصية", desc: "موت الشخصية نهائياً أو إعدامها من قبل الإدارة بناءً على طلب أو سيناريو." },
+            { id: "rule-RK", code: "RK", name: "قتل الانتقام (Revenge Kill)", desc: "العودة لمكان موتك وقتل من قتلك متجاهلاً قاعدة الـ PK." },
+            { id: "rule-CR", code: "CR", name: "الركض وتفادي إطلاق النار", desc: "الركض بشكل غير واقعي لتفادي الرصاص أو الجري دوران وأثناء إطلاق النار." },
+            { id: "rule-NJ", code: "NJ", name: "السرقة دون اربي / إنزال شخص", desc: "إنزال شخص من مركبته أو سرقتها دون تفاعل اربي صحيح." },
+            { id: "rule-NK", code: "NK", name: "الضرب أثناء الجري", desc: "ضرب شخص بيدك أو بسلاح أبيض وأنت تجري." },
+            { id: "rule-MK", code: "MK", name: "الضرب أثناء الجري (متكرر)", desc: "مخالفة تتعلق بالضرب والحركة المستمرة غير الواقعية." },
+            { id: "rule-Non-RP", code: "Non-RP", name: "فعل اشياء بدون اربي", desc: "التصرف بشكل عام بطريقة مخالفة للواقع ومنطق اللعبة." },
+            { id: "rule-NL", code: "NL", name: "حياة مقززة أو غير واقعية", desc: "القيام بتصرفات غير مقبولة أو مقززة داخل بيئة اللعب." },
+            { id: "rule-Not-Wire", code: "Not Wire", name: "المحرك لا يعمل", desc: "استخدام اربي صحيح عند تشغيل المحرك سواء فشلت المحاولة أو نجحت." },
+            { id: "rule-NLR", code: "NLR", name: "قاعدة عدم تذكر المكان", desc: "عدم تذكر مكان الموت أو الأحداث السابقة المرتبطة بالوفاة." },
+            { id: "rule-SA", code: "SA", name: "نشر سيرفرات أخرى", desc: "الترويج لسيرفرات أو مجتمعات أخرى داخل السيرفر ويعاقب عليها بصرامة." },
+            { id: "rule-SK", code: "SK", name: "القتل في الرسباون", desc: "قتل الأشخاص فور ظهورهم في مناطق الرسباون أو المستشفيات." },
+            { id: "rule-SC", code: "SC", name: "استخدام اسم شخصية مشهورة", desc: "استخدام أسماء شخصيات حقيقية مشهورة عالمياً." },
+            { id: "rule-SL", code: "SL", name: "حياة مقززة", desc: "أفعال خادشة للحياء أو مقززة في الأماكن العامة." },
+            { id: "rule-SP", code: "SP", name: "النصب بأكثر من 10 آلاف", desc: "عمليات النصب والاحتيال المالي المسموحة بحد أقصى أو شروط معينة." },
+            { id: "rule-SE", code: "SE", name: "تخريب التوظيف", desc: "قانون لتنظيم الاربي من قبل الإشراف والأدمنية أو تخريب الوظائف." },
+            { id: "rule-SEW", code: "S&EW", name: "قانون الحرب والهدنة", desc: "القوانين المنظمة للحروب والهدنة بين الفاكشنات." },
+            { id: "rule-TK", code: "TK", name: "قتل أصدقائك في الفاكشن", desc: "قتل شخص ينتمي لنفس الفاكشن أو العصابة التي أنت فيها." },
+            { id: "rule-UH", code: "UH", name: "فعل العادات المضرة", desc: "مثل التدخين المفرط أو تدمير الشخصية صحياً بشكل متعمد." },
+            { id: "rule-VD", code: "VD", name: "قانون وصف السيارات", desc: "الالتزام بالواقعية عند قيادة ووصف السيارات واستخدامها." },
+            { id: "rule-VR", code: "VR", name: "قانون سرقة السيارة", desc: "الضوابط المفروضة عند محاولة سرقة سيارة بدون تشغيل المحرك." },
+            { id: "rule-VT", code: "VT", name: "تشغيل المحرك", desc: "القوانين المتعلقة بتشغيل وتفعيل محركات المركبات." },
+            { id: "rule-WH", code: "WH", name: "القفز فوق المركبات والدراجات", desc: "ركوب الموتسيكل أو الدراجة والقفز فوق الجبال، البيوت أو الأشخاص." },
+            { id: "rule-WA", code: "WA", name: "إعلان خاطئ", desc: "نشر إعلانات غير واقعية أو مخالفة في شات الإعلانات العامة." },
+            { id: "rule-QS", code: "QS", name: "تبديل الأسلحة في اليد", desc: "قوانين تبديل الأسلحة وسحبها بدون اربي كافي." },
+            { id: "rule-IC", code: "IC", name: "الشات الواقعي", desc: "الشات المخصص للأحداث والشخصية داخل اللعبة (In Character)." },
+            { id: "rule-OOC", code: "OOC", name: "الشات الخارجي", desc: "الشات المخصص للحديث خارج نطاق اللعبة والشخصية (Out Of Character)." },
+            { id: "rule-ATA", code: "ATA", name: "نقل ممتلكات (Alt to Alt)", desc: "نقل الممتلكات أو الأموال من شخصية إلى أخرى تابعة لنفس اللاعب." },
+            { id: "rule-AR", code: "AR", name: "استخدام الرتبة للمصلحة", desc: "استخدام الرتبة أو الصلاحية لتحقيق مصالح شخصية." },
+            { id: "rule-Arson", code: "Arson", name: "التسبب في حريق", desc: "إشعال الحرائق ويجب أن يكون تحت إشراف أدمن ومع وجود عدد كافي من المدافعين." },
+            { id: "rule-AGC", code: "AGC", name: "استخدام الجليتشات", desc: "استغلال أخطاء اللعبة أو السكريبت (Abusing the Game or Script)." },
+            { id: "rule-DB", code: "DB", name: "تصادم السيارات والدعس", desc: "صدم السيارات بقصد الأذية ودعس الأشخاص." },
+            { id: "rule-DDP", code: "DDP", name: "القتل أثناء التسوق", desc: "إطلاق النار أو القتل وأنت تتسوق أو في مناطق آمنة محددة." },
+            { id: "rule-DUC", code: "DUC", name: "تدمير الشخصية مثل الانتحار", desc: "إنهاء حياة الشخصية بطرق غير واقعية مثل الانتحار العشوائي." },
+            { id: "rule-Dos", code: "Dos", name: "ديوتي بدون شارة", desc: "العمل بالوظيفة الحكومية أو الرسمية بدون ارتداء الشارة." },
+            { id: "rule-Low-RP", code: "Low-RP", name: "اربي ضعيف", desc: "مستوى تفاعل ضعيف جداً ولا يتماشى مع معايير الـ Roleplay." },
+            { id: "rule-LK", code: "LK", name: "إطلاق نار في مكان عام", desc: "تحتاج إذن أو سبب قوي لإطلاق النار في مكان عام مثل المركز أو المدن المزدحمة." },
+            { id: "rule-KOS", code: "KOS", name: "الحقد على لاعب", desc: "الحقد أو استهداف لاعب معين داخل أو خارج نطاق الاربي بشكل متكرر." },
+            { id: "rule-GR", code: "GR", name: "القاعدة الذهبية", desc: "احترام اللاعبين والقاعدة الأساسية لضمان متعة الجميع." },
+            { id: "rule-CD", code: "CD", name: "تطوير الشخصية", desc: "الاهتمام بتفاصيل الشخصية مثل الأكل، الشرب وتطور القصة (Character Development)." },
+            { id: "rule-CCTV", code: "CCTV", name: "قانون الكاميرات والبرمجة", desc: "التعامل مع كاميرات المراقبة وأنظمة التكييف والتقنية في السيناريوهات." },
+            { id: "rule-CS", code: "CS", name: "استخدام جليتش الأسلحة", desc: "استغلال ثغرات الأسلحة للحصول على أفضلية غير قانونية." },
+            { id: "rule-CP", code: "CP", name: "قانون سرقة المحلات التجارية", desc: "الشروط والضوابط الخاصة بسطو وسرقة المتاجر." },
+            { id: "rule-Corruption", code: "Corruption", name: "الفساد المالي والإداري", desc: "الضوابط والشروط الخاصة بوجود فساد داخل الفاكشنات الحكومية." },
+            { id: "rule-PD", code: "PD", name: "استفزاز الشرطة", desc: "استفزاز رجال الشرطة بغرض المتعة أو افتعال مشاكل بلا هدف اربي." },
+            { id: "rule-PM", code: "PM", name: "قانون الرسائل الخاصة", desc: "التعليمات الخاصة باستخدام الرسائل الخاصة بين اللاعبين." },
+            { id: "rule-PI", code: "PI", name: "قانون تفتيش الممتلكات", desc: "الضوابط الخاصة بتفتيش المنازل والمركبات والمقرات." },
+            { id: "rule-RPZ", code: "RPZ", name: "منطقة العيش / زون الاربي", desc: "مناطق محددة يتطلب فيها الالتزام التام بقوانين الاربي (Roleplay Zone)." },
+            { id: "rule-RPG", code: "RPG", name: "أخذ ار بي جي", desc: "أخذ سلاح الـ RPG من أمر السلاح وعليها وارن مباشر." },
+            { id: "rule-RTR", code: "RTR", name: "الجري دون تعب", desc: "الركض المستمر دون توقف أو إرهاق واقعي للشخصية." },
+            { id: "rule-RR", code: "RR", name: "الجري دون تعب (تكرار)", desc: "مخالفة تكرار الإرهاق والحركة المفرطة." },
+            { id: "rule-FRP", code: "FRP", name: "فشل اللاعب في تقمص الدور", desc: "عدم الالتزام بشخصية الـ Roleplay الخاصة بك." },
+            { id: "rule-GFA", code: "GFA", name: "استخراج السلاح من حزامك", desc: "الالتزام بسحب الأسلحة بالطريقة الصحيحة من الحزام." },
+            { id: "rule-Inactivity", code: "Inactivity", name: "قانون عدم النشاط", desc: "القوانين المتعلقة بغياب اللاعبين أو الفاكشنات لفترة طويلة." },
+            { id: "rule-LIRL", code: "LIRL", name: "محاولة إيقاف اربي بدون سبب", desc: "قطع سيناريو اربي نشط بحجج واهية أو غير مقبولة." },
+            { id: "rule-MD", code: "MD", name: "سوء استخدام الكللبشات", desc: "استخدام القيود والأغلال بشكل مخالف للقوانين." },
+            { id: "rule-MC", code: "MC", name: "الضغط بدون قصد على الماوس", desc: "إطلاق نار بالخطأ أو عمل شيء غير مقصود بالتحكم." },
+            { id: "rule-MA", code: "MA", name: "تعدد الحسابات", desc: "أن يمتلك كل حساب واحد فقط ولا يحق تعدد الحسابات (Multiple Accounts)." }
+        ];
+
+        // أوامر اللاعبين الأساسية
+        const commandsData = [
+            { id: "cmd-gate", code: "/gate", name: "فتح البوابة", desc: "أمر مخصص للاعبين للتحكم في فتح وغلق بوابات المقرات." },
+            { id: "cmd-duty", code: "/duty", name: "فتح الديوتي", desc: "للدخول إلى الخدمة العسكرية أو الحكومية وبدء العمل الرسمي." },
+            { id: "cmd-gov", code: "/gov", name: "إعلان حكومي", desc: "مخصص للجهات الرسمية لإرسال إعلانات عامة لجميع اللاعبين." },
+            { id: "cmd-issuebadge", code: "/issuebadge", name: "إصدار شارة", desc: "لإصدار شارة التعريف الشخصية أو الوظيفية." },
+            { id: "cmd-bind", code: "/bind", name: "ربط زر", desc: "لتسجيل وظيفة أو أمر معين على زر في الكيبورد للاستخدام السريع." }
+        ];
+
+        // الأوامر الإدارية الكاملة بدون نقص
+        const adminData = [
+            { id: "adm-dutyadmin", code: "/dutyadmin", name: "تفعيل وضع الأدمن", desc: "تفعيل/إيقاف وضع الأدمن." },
+            { id: "adm-aduty", code: "/aduty", name: "تشغيل الشارة", desc: "تفعيل شارة الأدمن أو تشغيلها." },
+            { id: "adm-adminduty", code: "/adminduty", name: "إطفاء الشارة", desc: "إطفاء الشارة أو تشغيلها." },
+            { id: "adm-disappear", code: "/disappear", name: "إخفاء نفسك", desc: "إخفاء نفسك عن اللاعبين." },
+            { id: "adm-hideadmin", code: "/hideadmin", name: "شاشة مخفية", desc: "تفعيل الشارة بدون ما تبين." },
+            { id: "adm-goto", code: "/goto", name: "الانتقال للاعب", desc: "الانتقال إلى مكان شخص معين." },
+            { id: "adm-gethere", code: "/gethere", name: "سحب لاعب", desc: "سحب لاعب إلى مكانك (يدعم ID)." },
+            { id: "adm-sendtoplace", code: "/sendtoplace", name: "الانتقال لمكان", desc: "الانتقال لمكان معين." },
+            { id: "adm-sendto", code: "/sendto", name: "إرسال لاعب", desc: "إرسال لاعب إلى لاعب آخر." },
+            { id: "adm-superman", code: "/superman", name: "أمر الطيران", desc: "إعطاء سوبر مان / أمر الطيران." },
+            { id: "adm-staff", code: "/staff", name: "قائمة الادمنية", desc: "عرض قائمة الأدمنية." },
+            { id: "adm-gduty", code: "/gduty", name: "تشغيل شارة السبورت", desc: "تشغيل شارة الدعم الفني / السبورت." },
+            { id: "adm-freecam", code: "/freecam", name: "اختراق الجدران", desc: "كاميرا حرة لاختراق الجدران." },
+            { id: "adm-showfeedbacks", code: "/showfeedbacks", name: "مشاهدة التقييم", desc: "عرض تقييمات الإدارة والسبورت." },
+            { id: "adm-getpoint", code: "/getpoint", name: "معرفة نقاطك", desc: "لمعرفة عدد نقاطك الإدارية." },
+            { id: "adm-reretcharacter", code: "/reretcharacter", name: "رسترت الشخصية", desc: "إعادة تعيين الشخصية." },
+            { id: "adm-reconnect", code: "/reconnect", name: "خروج ودخول", desc: "إعادة الاتصال باللعبة." },
+            { id: "adm-supervise", code: "/supervise", name: "اختفاء جزئي", desc: "مراقبة اللاعبين باختفاء جزئي." },
+            { id: "adm-fakeme", code: "/fakeme", name: "ظهور باسم فيك", desc: "الظهور باسم مزيف/فيك." },
+            { id: "adm-items", code: "/items", name: "قائمة الغش / الأغراض", desc: "فتح قائمة الغش أو itemList." },
+            { id: "adm-gunmaker", code: "/gunmaker", name: "لوحة الأسلحة", desc: "فتح لوحة الأسلحة للإدارة." },
+            { id: "adm-watch", code: "/watch", name: "مراقبة مع الحركة", desc: "تستخدم لمراقبة شخص وأنت تتحرك." },
+            { id: "adm-recon", code: "/recon", name: "مراقبة شخص", desc: "مراقبة لاعب محدد." },
+            { id: "adm-check", code: "/check", name: "معرفة معلومات شخص", desc: "فحص ومعرفة معلومات شخصية أو تفاصيل لاعب." },
+            { id: "adm-changename", code: "/changename", name: "تغيير اسم شخص", desc: "لتغيير اسم شخصية لاعب." },
+            { id: "adm-findip", code: "/findip", name: "معرفة آيبي لاعب", desc: "البحث عن الآيبي الخاص بلاعب." },
+            { id: "adm-loginto", code: "/loginto", name: "دخول بحساب شخص", desc: "الدخول المباشر بحساب شخص آخر." },
+            { id: "adm-findalts", code: "/findalts", name: "إظهار شخصيات اللاعب", desc: "معرفة كم شخصية في الحساب وإظهار كافة الشخصيات." },
+            { id: "adm-resetaccount", code: "/resetaccount", name: "رسترت حساب", desc: "عمل رسترت لحساب معين." },
+            { id: "adm-freconnect", code: "/freconnect", name: "ريكونت لاعب", desc: "عمل ريكونت سريع للاعب معين." },
+            { id: "adm-freezead", code: "/freezead", name: "تجميد الاعلانات", desc: "تجميد الإعلانات العامة." },
+            { id: "adm-showkills", code: "/showkills", name: "عرض أحداث القتل", desc: "عرض سجل أحداث القتل في السيرفر." },
+            { id: "adm-getpos", code: "/getpos", name: "معرفة إحداثياتك", desc: "الحصول على الإحداثيات الحالية لموقعك." },
+            { id: "adm-createemitter", code: "/createemitter", name: "عمل نار", desc: "صناعة مؤثرات نار [لطفاء الحريق]." },
+            { id: "adm-srl", code: "/srl", name: "معرفة مستوى المطر", desc: "عرض وإدارة حالة الطقس والمطر." },
+            { id: "adm-sw1", code: "/sw1", name: "تغير الطقس", desc: "تغيير حالة الطقس." },
+            { id: "adm-jail", code: "/jail", name: "سجن لاعب", desc: "سجن لاعب لفترة محددة (يدعم ID والوقت)." },
+            { id: "adm-ojail", code: "/ojail", name: "سجن بلا اتصال", desc: "سجن لاعب غير متصل باللعبة." },
+            { id: "adm-unjail", code: "/unjail", name: "فك سجن", desc: "فك السجن عن اللاعب." },
+            { id: "adm-adminjail", code: "/adminjail", name: "سجن إداري", desc: "إدخال اللاعب إلى السجن الإداري." },
+            { id: "adm-sjail", code: "/sjail", name: "سجن سري", desc: "سجن لاعب دون أن يدري أحد فقط الأدمنية." },
+            { id: "adm-sojail", code: "/sojail", name: "سجن سري بلا اتصال", desc: "سجنه بلا اتصال ودون أن يعلم أحد." },
+            { id: "adm-banaccount", code: "/banaccount", name: "باند للحساب", desc: "إعطاء باند نهائي أو مؤقت للحساب." },
+            { id: "adm-pban", code: "/pban", name: "باند دائم", desc: "حظر اللاعب باند دائم." },
+            { id: "adm-oban", code: "/oban", name: "باند بلا اتصال", desc: "حظر لاعب غير متصل." },
+            { id: "adm-showban", code: "/showban", name: "معرفة سبب الحظر", desc: "الاستعلام عن سبب حظر اللاعب." },
+            { id: "adm-banip", code: "/banip", name: "باند آيبي", desc: "حظر عن طريق الـ IP [IP Address] [Reason]." },
+            { id: "adm-banserial", code: "/banserial", name: "باند سيال", desc: "حظر عن طريق السيريال [Serial Number] [Reason]." },
+            { id: "adm-findserial", code: "/findserial", name: "معرفة سيريال لاعب", desc: "استخراج السيريال الخاص باللاعب." },
+            { id: "adm-unban", code: "/unban", name: "فك باند", desc: "إلغاء الحظر / فك الباند." },
+            { id: "adm-pmute", code: "/pmute", name: "ميوت في OOC", desc: "إعطاء ميوت في الشات العام الخارجي." },
+            { id: "adm-warn", code: "/warn", name: "تحذير لاعب", desc: "إعطاء تحذير (إذا أصبحت 3 يحصل على باند)." },
+            { id: "adm-slap", code: "/slap", name: "سلاب لاعب", desc: "إعطاء سلاب / دفع اللاعب." },
+            { id: "adm-kick", code: "/kick", name: "طرد لاعب", desc: "طرد لاعب من السيرفر." },
+            { id: "adm-pkick", code: "/pkick", name: "طرد لاعب (سري)", desc: "طرد اللاعب بطريقة صامتة." },
+            { id: "adm-skick", code: "/skick", name: "طرد سري", desc: "طرد لاعب دون أن يدري أحد فقط الأدمنية." },
+            { id: "adm-soban", code: "/soban", name: "باند سري", desc: "إعطاء باند دون يعلم أحد فقط الأدمني." },
+            { id: "adm-bury", code: "/bury", name: "دفن لاعب", desc: "دفن اللاعب في الأرض." },
+            { id: "adm-revive", code: "/revive", name: "إنعاش شخص", desc: "إعادة إحياء الشخص بعد الموت." },
+            { id: "adm-sethp", code: "/sethp", name: "اعطاء دم", desc: "تحديد مقدار الدم للاعب." },
+            { id: "adm-setarmor", code: "/setarmor", name: "اعطاء درع", desc: "إعطاء درع لحخص بنسبة معينة." },
+            { id: "adm-disarm", code: "/disarm", name: "حذف أسلحة", desc: "سحب وحذف جميع الأسلحة للاعب معين." },
+            { id: "adm-delitemsfromint", code: "/delitemsfromint", name: "حذف سلاح من منزل", desc: "حذف غرض أو سلاح داخل منزل." },
+            { id: "adm-auncuff", code: "/auncuff", name: "فك كلبش", desc: "فك قيود وأغلال اللاعب إدارياً." }
+        ];
+
+        // أسئلة الوايت ليست (20 سؤالاً حول القوانين العامة بنظام اختيار من متعدد)
+        const whitelistQuestionsPool = [
+            { q: "ما هي قاعدة DM؟", options: ["القتل بدون سبب كافي", "قيادة السيارة بسرعة", "سرقة السيارات بدون اربي", "التكلم في الشات الخارجي"], correct: 0 },
+            { q: "ما المقصود بقاعدة VDM؟", options: ["الهروب من الاربي", "دعس اللاعبين بالسيارة كسلح", "التحدث في شات الاوك", "قتل صديقك في الفاكشن"], correct: 1 },
+            { q: "ما هي قاعدة RDM؟", options: ["الموت والنسيان", "تكرار القتل دون توقف وبدون سبب", "الركض المستمر", "عمل إعلان خاطئ"], correct: 1 },
+            { q: "ماذا تعني قاعدة LTA؟", options: ["الهروب أو الخروج أثناء سيناريو اربي نشط", "بيع الممتلكات", "دخول السيرفر لأول مرة", "إنشاء شخصية جديدة"], correct: 0 },
+            { q: "ما المقصود بـ MetaGaming (MG)؟", options: ["خلط معلومات الواقع OOC مع اللعبة IC", "لعب الألعاب الرياضية", "سرقة بنك كبير", "تصليح السيارة"], correct: 0 },
+            { q: "ما تعريف قاعدة PowerGaming (PG)؟", options: ["القيام بأفعال مستحيلة واقعياً أو فرض أفعال على الآخرين", "زيادة قوة طاقة السلاح", "شراء سيارة سريعة جداً", "العمل في وظيفة حكومية"], correct: 0 },
+            { q: "ما هي قاعدة PK؟", options: ["فقدان الذاكرة بعد الموت وعدم الانتقام", "قتل المدير العام", "دخول السجن المؤبد", "تغيير اسم الشخصية"], correct: 0 },
+            { q: "ماذا تعني قاعدة CK؟", options: ["إعدام الشخصية نهائياً", "تصليح الإطارات", "القفز فوق الجبال", "الاشتراك في مسابقة سباق"], correct: 0 },
+            { q: "ما هي قاعدة Revenge Kill (RK)؟", options: ["العودة لمكان موتك ومهاجمة قاتلك متجاهلاً الـ PK", "مساعدة صديقك المصاب", "الاعتذار للشرطة", "شراء سلاح جديد"], correct: 0 },
+            { q: "ما المقصود بـ Non-RP؟", options: ["التصرف بطريقة مخالفة للواقع ومنطق اللعبة", "عدم امتلاك ميكروفون", "اللعب بدون سماعات", "التسجيل في منتدى السيرفر"], correct: 0 },
+            { q: "ما هي قاعدة NLR؟", options: ["قاعدة عدم تذكر مكان الموت والحدث", "عدم تشغيل محرك السيارة", "مخالفة إشهار السلاح", "السرقة في الليل"], correct: 0 },
+            { q: "ما هو حكم النشر لسيرفرات أخرى (SA)؟", options: ["باند نهائي صارم", "إنذار بسيط", "سخصية مؤقتة", "سجن 5 دقائق"], correct: 0 },
+            { q: "ما المقصود بـ SK؟", options: ["القتل فور الظهور في مناطق الرسباون والمستشفيات", "سرقة المفاتيح", "القفز بالدراجة", "تعديل ألوان السيارة"], correct: 0 },
+            { q: "ما تعريف قاعدة TK؟", options: ["قتل شخص ينتمي لنفس الفاكشن أو العصابة", "تخريب الإعلانات", "دخول منطقة محظورة", "العمل بمهنة الحطب"], correct: 0 },
+            { q: "ما هو الـ IC والـ OOC؟", options: ["IC داخل الشخصية والـ OOC خارجه", "نوعان من السيارات الرياضية", "أسماء الأسلحة الثقيلة", "مستويات الإدارة"], correct: 0 },
+            { q: "ماذا تعني قاعدة Alt to Alt (ATA)؟", options: ["نقل الممتلكات والأموال بين شخصيات نفس اللاعب", "تبديل المقاعد في السيارة", "القفز العالي", "تغيير الملابس"], correct: 0 },
+            { q: "ما هي قاعدة Fail Roleplay (FRP)؟", options: ["فشل اللاعب في تقمص الدور والواقعية", "النجاح في اختبار الوايت ليست", "الحصول على رتبة عالية", "سرقة محل صغير"], correct: 0 },
+            { q: "ما المقصود بـ Safe Zone / DDP؟", options: ["منطقة آمنة يمنع فيها القتل والتسوق المسلح", "منطقة حروب العصابات", "مقر الشرطة الرئيسي", "مكان تجمع الإدارة"], correct: 0 },
+            { q: "ما هي عقوبة تراكم 3 تحذيرات (Warns)؟", options: ["الحصول على باند مباشر", "ترقية فورية", "الحصول على أموال", "إعطاء عفو عام"], correct: 0 },
+            { q: "ما هي القاعدة الذهبية (GR) في السيرفر؟", options: ["احترام جميع اللاعبين وضمان متعة الجميع", "جمع أكبر قدر من الأموال", "امتلاك أسرع سيارة", "أن تصبح مديراً للسيرفر"], correct: 0 }
+        ];
+
+        // أسئلة اختبارات الإدارة (سبورت ورتبة أخرى)
+        const adminSupportQuestions = [
+            { q: "ما هو استخدام الأمر /goto؟", options: ["الانتقال لشخص", "سحب شخص", "طيران", "تغيير اسم"], correct: 0 },
+            { q: "ما هو استخدام الأمر /sendto؟", options: ["إرسال لاعب إلى لاعب آخر", "فتح البوابة", "الخروج من السيرفر", "إعطاء باند"], correct: 0 },
+            { q: "ما هو استخدام الأمر /sendtoplace؟", options: ["ذهاب لمكان معين", "سحب السيارة", "صنع نار", "معرفة الآيبي"], correct: 0 },
+            { q: "ما هو استخدام الأمر /gethere؟", options: ["سحب شخص", "طيران", "مراقبة شخص", "فك كلبش"], correct: 0 },
+            { q: "ما هو استخدام الأمر /superman؟", options: ["طيران", "سجن لاعب", "إعطاء درع", "مشاهدة التقييمات"], correct: 0 },
+            { q: "ما هو استخدام الأمر /staff؟", options: ["عرض قائمة الاداره", "فتح الديوتي", "إرسال إعلان حكومي", "حذف الأسلحة"], correct: 0 },
+            { q: "ما هو استخدام الأمر /gduty؟", options: ["تشغيل شارة السبورت", "إطفاء الشارة", "طرد لاعب", "دفن لاعب"], correct: 0 },
+            { q: "ما هو استخدام الأمر /showfeedbacks؟", options: ["رؤية التقيمات", "عرض أحداث القتل", "معرفة الإحداثيات", "تغيير الطقس"], correct: 0 },
+            { q: "ما هو استخدام الأمر /freecam؟", options: ["كاميرا حره للاختراق الجدران", "تجميد الإعلانات", "سجن سري", "باند دائم"], correct: 0 },
+            { q: "ما هو استخدام الأمر /recon؟", options: ["مراقبة شخص", "معرفة معلومات شخص", "فك سجن", "إعطاء ميوت"], correct: 0 },
+            { q: "ما هو استخدام الأمر /check؟", options: ["معرفة معلومات شخص", "حذف أسلحة", "تفعيل وضع الأدمن", "ظهور باسم فيك"], correct: 0 },
+            { q: "ما هو استخدام الأمر /auncuff؟", options: ["فك الكلبشه", "سجن لاعب", "طرد لاعب", "إعطاء تحذير"], correct: 0 }
+        ];
+
+        // تهيئة الخلفية التفاعلية
+        function initParticles(color = "#00a8ff") {
+            particlesJS("particles-js", {
+                "particles": {
+                    "number": { "value": 70, "density": { "enable": true, "value_area": 800 } },
+                    "color": { "value": color },
+                    "shape": { "type": "circle" },
+                    "opacity": { "value": 0.5, "random": false },
+                    "size": { "value": 3, "random": true },
+                    "line_linked": {
+                        "enable": true,
+                        "distance": 150,
+                        "color": color,
+                        "opacity": 0.4,
+                        "width": 1
+                    },
+                    "move": { "enable": true, "speed": 2, "direction": "none", "random": false, "out_mode": "out" }
+                },
+                "interactivity": {
+                    "detect_on": "canvas",
+                    "events": { "onhover": { "enable": true, "mode": "repulse" }, "onclick": { "enable": true, "mode": "push" } }
+                },
+                "retina_detect": true
+            });
+        }
+
+        window.onload = function() {
+            initParticles("#00a8ff");
+            renderAll();
+        };
+
+        function startApp() {
+            document.getElementById('welcome-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'flex';
+        }
+
+        function toggleThemeMenu() {
+            document.getElementById('themeMenu').classList.toggle('show');
+        }
+
+        function setTheme(themeName, icon, name) {
+            document.body.setAttribute('data-theme', themeName);
+            document.getElementById('current-theme-icon').innerText = icon;
+            document.getElementById('current-theme-name').innerText = name;
+            document.getElementById('themeMenu').classList.remove('show');
+
+            let newColor = "#00a8ff";
+            if(themeName === 'purple-neon') newColor = "#a855f7";
+            else if(themeName === 'matrix-green') newColor = "#22c55e";
+            else if(themeName === 'amoled-black') newColor = "#38bdf8";
+            else if(themeName === 'pure-white') newColor = "#0284c7";
+
+            initParticles(newColor);
+        }
+
+        let favorites = JSON.parse(localStorage.getItem('mta_favs')) || [];
+
+        function toggleFav(id, event) {
+            event.stopPropagation();
+            if (favorites.includes(id)) {
+                favorites = favorites.filter(fav => fav !== id);
+            } else {
+                favorites.push(id);
+            }
+            localStorage.setItem('mta_favs', JSON.stringify(favorites));
+            renderAll();
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text);
+            let toast = document.getElementById('toast');
+            toast.className = "show";
+            setTimeout(() => { toast.className = ""; }, 2500);
+        }
+
+        function renderGrid(data, elementId, isCommand = false) {
+            let container = document.getElementById(elementId);
+            container.innerHTML = "";
+            data.forEach(item => {
+                let isFav = favorites.includes(item.id);
+                let card = document.createElement('div');
+                card.className = isCommand ? "card command-card" : "card";
+                if(isCommand) {
+                    card.onclick = () => copyText(item.code);
+                }
+                card.innerHTML = `
+                    <div class="card-header-row">
+                        <div class="card-title">${item.code} - ${item.name}</div>
+                        <button class="fav-star ${isFav ? 'active' : ''}" onclick="toggleFav('${item.id}', event)">★</button>
+                    </div>
+                    <div class="card-desc">${item.desc}</div>
+                    ${isCommand ? `<span style="font-size:0.8rem; color:var(--accent-blue); font-weight:bold;">انقر للنسخ 📋</span>` : ''}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderFavorites() {
+            let allData = [...rulesData, ...commandsData, ...adminData];
+            let favData = allData.filter(item => favorites.includes(item.id));
+            let container = document.getElementById('favorites-grid');
+            container.innerHTML = "";
+            if(favData.length === 0) {
+                container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; color:var(--text-muted); padding:40px;">لا توجد عناصر في المفضلة حالياً ⭐</div>`;
+                return;
+            }
+            favData.forEach(item => {
+                let isCmd = item.code.startsWith('/');
+                let card = document.createElement('div');
+                card.className = isCmd ? "card command-card" : "card";
+                if(isCmd) card.onclick = () => copyText(item.code);
+                card.innerHTML = `
+                    <div class="card-header-row">
+                        <div class="card-title">${item.code} - ${item.name}</div>
+                        <button class="fav-star active" onclick="toggleFav('${item.id}', event)">★</button>
+                    </div>
+                    <div class="card-desc">${item.desc}</div>
+                    ${isCmd ? `<span style="font-size:0.8rem; color:var(--accent-blue); font-weight:bold;">انقر للنسخ 📋</span>` : ''}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderAll() {
+            renderGrid(rulesData, 'rules-grid', false);
+            renderGrid(commandsData, 'commands-grid', true);
+            renderGrid(adminData, 'admin-grid', true);
+            renderFavorites();
+        }
+
+        function switchTab(tabName, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById(tabName + '-section').classList.add('active');
+            if(tabName === 'favorites') renderFavorites();
+        }
+
+        function openCommandSub(type) {
+            document.getElementById('commands-selector-view').style.display = 'none';
+            if(type === 'player') {
+                document.getElementById('player-commands-view').style.display = 'block';
+            } else {
+                document.getElementById('admin-commands-view').style.display = 'block';
+            }
+        }
+
+        function backToCommandsSelector() {
+            document.getElementById('player-commands-view').style.display = 'none';
+            document.getElementById('admin-commands-view').style.display = 'none';
+            document.getElementById('commands-selector-view').style.display = 'flex';
+        }
+
+        // --- QUIZ LOGIC & NAVIGATION ---
+        let currentQuizType = null; 
+        let quizTimer = null;
+        let timeLeft = 0;
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let activeQuestionsList = [];
+        let applicantInfo = {};
+
+        function selectQuizType(type) {
+            document.getElementById('quiz-main-selector').style.display = 'none';
+            if (type === 'whitelist') {
+                currentQuizType = 'whitelist';
+                showPersonalForm('whitelist');
+            } else if (type === 'admin_select') {
+                document.getElementById('admin-quiz-selector').style.display = 'flex';
+            }
+        }
+
+        function startAdminQuiz(subType) {
+            currentQuizType = (subType === 'support') ? 'admin_support' : 'admin_other';
+            document.getElementById('admin-quiz-selector').style.display = 'none';
+            showPersonalForm('admin');
+        }
+
+        function backToQuizMain() {
+            document.getElementById('admin-quiz-selector').style.display = 'none';
+            document.getElementById('quiz-main-selector').style.display = 'flex';
+        }
+
+        function showPersonalForm(formType) {
+            let container = document.getElementById('personal-info-container');
+            container.style.display = 'block';
+            
+            if (formType === 'whitelist') {
+                container.innerHTML = `
+                    <div class="quiz-panel">
+                        <button class="back-to-sub-btn" onclick="resetQuizHub()">← عودة</button>
+                        <h2 class="sub-options-title" style="font-size:1.5rem; margin-bottom:20px;">تسجيل البيانات الشخصية (وايت ليست)</h2>
+                        <div class="form-group">
+                            <label>الاسم:</label>
+                            <input type="text" id="p-name" class="form-input" placeholder="اكتب اسمك هنا...">
+                        </div>
+                        <div class="form-group">
+                            <label>العمر الحقيقي:</label>
+                            <input type="number" id="p-age" class="form-input" placeholder="عمرك بالسنوات...">
+                        </div>
+                        <div class="form-group">
+                            <label>كم له يلعب MTA:</label>
+                            <input type="text" id="p-mta-time" class="form-input" placeholder="خبرتك في اللعبة...">
+                        </div>
+                        <div class="form-group">
+                            <label>بلدك:</label>
+                            <input type="text" id="p-country" class="form-input" placeholder="بلد إقامتك...">
+                        </div>
+                        <div class="form-group">
+                            <label>لديك شخصيتين فقط داخل السيرفر - ارسم سيناريو لشخصيتك الاولي فقط:</label>
+                            <textarea id="p-scenario" class="form-textarea" placeholder="اكتب سيناريو شخصيتك الأولى هنا باهتمام..."></textarea>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-top:20px;">
+                            <button class="btn-secondary" onclick="resetQuizHub()">عودة</button>
+                            <button class="btn-main" onclick="submitPersonalForm('whitelist')">جاهز للاختبار</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="quiz-panel">
+                        <button class="back-to-sub-btn" onclick="selectQuizType('admin_select')">← عودة</button>
+                        <h2 class="sub-options-title" style="font-size:1.5rem; margin-bottom:20px;">تسجيل البيانات الشخصية (تقديم الإدارة)</h2>
+                        <div class="form-group">
+                            <label>اسمك:</label>
+                            <input type="text" id="a-name" class="form-input" placeholder="اكتب اسمك هنا...">
+                        </div>
+                        <div class="form-group">
+                            <label>عمرك الحقيقي:</label>
+                            <input type="number" id="a-age" class="form-input" placeholder="عمرك بالسنوات...">
+                        </div>
+                        <div class="form-group">
+                            <label>بلدك:</label>
+                            <input type="text" id="a-country" class="form-input" placeholder="بلد إقامتك...">
+                        </div>
+                        <div class="form-group">
+                            <label>هل كنت اداري في سيرفر سابق؟</label>
+                            <input type="text" id="a-prev-admin" class="form-input" placeholder="نعم / لا مع التفاصيل...">
+                        </div>
+                        <div class="form-group">
+                            <label>اذكر السيرفرات الذي عملت بيها من قبل:</label>
+                            <textarea id="a-servers" class="form-textarea" placeholder="اسماء السيرفرات السابقة..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>ما الذي يميزك عن غيرك؟</label>
+                            <textarea id="a-features" class="form-textarea" placeholder="اكتب مهاراتك ومميزاتك..."></textarea>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-top:20px;">
+                            <button class="btn-secondary" onclick="selectQuizType('admin_select')">عودة</button>
+                            <button class="btn-main" onclick="submitPersonalForm('admin')">جاهز للاختبار</button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function submitPersonalForm(type) {
+            if (type === 'whitelist') {
+                applicantInfo.name = document.getElementById('p-name').value.trim();
+                applicantInfo.age = document.getElementById('p-age').value.trim();
+                applicantInfo.mtaTime = document.getElementById('p-mta-time').value.trim();
+                applicantInfo.country = document.getElementById('p-country').value.trim();
+                applicantInfo.scenario = document.getElementById('p-scenario').value.trim();
+
+                if(!applicantInfo.name || !applicantInfo.age || !applicantInfo.scenario) {
+                    alert("الرجاء ملء الحقول الأساسية وسيناريو الشخصية قبل البدء!");
+                    return;
+                }
+            } else {
+                applicantInfo.name = document.getElementById('a-name').value.trim();
+                applicantInfo.age = document.getElementById('a-age').value.trim();
+                applicantInfo.country = document.getElementById('a-country').value.trim();
+                applicantInfo.prevAdmin = document.getElementById('a-prev-admin').value.trim();
+                applicantInfo.servers = document.getElementById('a-servers').value.trim();
+                applicantInfo.features = document.getElementById('a-features').value.trim();
+
+                if(!applicantInfo.name || !applicantInfo.age) {
+                    alert("الرجاء ملء اسمك وعمرك الحقيقي قبل البدء!");
+                    return;
+                }
+            }
+
+            document.getElementById('personal-info-container').style.display = 'none';
+            startQuizExecution();
+        }
+
+        function startQuizExecution() {
+            currentQuestionIndex = 0;
+            userAnswers = [];
+
+            if (currentQuizType === 'whitelist') {
+                let shuffledPool = [...whitelistQuestionsPool].sort(() => 0.5 - Math.random());
+                activeQuestionsList = shuffledPool.slice(0, 20).map(qObj => {
+                    let opts = [...qObj.options];
+                    let correctAnswerText = opts[qObj.correct];
+                    opts.sort(() => 0.5 - Math.random());
+                    let newCorrectIndex = opts.indexOf(correctAnswerText);
+                    return { q: qObj.q, options: opts, correct: newCorrectIndex };
+                });
+                timeLeft = 600; // 10 دقائق
+            } else if (currentQuizType === 'admin_support') {
+                activeQuestionsList = [...adminSupportQuestions].map(qObj => {
+                    let opts = [...qObj.options];
+                    let correctAnswerText = opts[qObj.correct];
+                    opts.sort(() => 0.5 - Math.random());
+                    let newCorrectIndex = opts.indexOf(correctAnswerText);
+                    return { q: qObj.q, options: opts, correct: newCorrectIndex };
+                });
+                timeLeft = 300; // 5 دقائق
+            } else {
+                activeQuestionsList = adminData.map(adm => {
+                    let correctDesc = adm.desc;
+                    let wrongDescs = adminData.filter(x => x.id !== adm.id).sort(() => 0.5 - Math.random()).slice(0, 3).map(x => x.desc);
+                    let opts = [correctDesc, ...wrongDescs].sort(() => 0.5 - Math.random());
+                    return {
+                        q: `ما هو استخدام الأمر ${adm.code} (${adm.name})؟`,
+                        options: opts,
+                        correct: opts.indexOf(correctDesc)
+                    };
+                }).sort(() => 0.5 - Math.random()).slice(0, 15);
+                timeLeft = 300; // 5 دقائق
+            }
+
+            document.getElementById('active-quiz-container').style.display = 'block';
+            renderQuestion();
+
+            if (quizTimer) clearInterval(quizTimer);
+            quizTimer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(quizTimer);
+                    handleTimeOut();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            let minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+            let timerEl = document.getElementById('quiz-timer-display');
+            if(timerEl) {
+                timerEl.innerText = `الوقت باقي: ${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                if (timeLeft <= 60) {
+                    timerEl.classList.add('warning');
+                }
+            }
+        }
+
+        function renderQuestion() {
+            let container = document.getElementById('active-quiz-container');
+            let qData = activeQuestionsList[currentQuestionIndex];
+            
+            let optionsHTML = '';
+            qData.options.forEach((opt, idx) => {
+                optionsHTML += `<button class="quiz-option-btn" onclick="selectOption(${idx})">${opt}</button>`;
+            });
+
+            container.innerHTML = `
+                <div class="quiz-panel">
+                    <div class="quiz-header">
+                        <span style="font-weight:bold; color:var(--text-muted);">السؤال ${currentQuestionIndex + 1} من ${activeQuestionsList.length}</span>
+                        <div id="quiz-timer-display" class="quiz-timer">الوقت باقي: 10:00</div>
+                    </div>
+                    <div class="quiz-question-text">${qData.q}</div>
+                    <div class="quiz-options-list">
+                        ${optionsHTML}
+                    </div>
+                    <div class="quiz-nav-row">
+                        <button class="btn-secondary" onclick="resetQuizHub()">إلغاء الاختبار</button>
+                        <span style="font-size:0.85rem; color:var(--text-muted);">اختر الإجابة الصحيحة للمتابعة</span>
+                    </div>
+                </div>
+            `;
+            updateTimerDisplay();
+        }
+
+        function selectOption(selectedIndex) {
+            let qData = activeQuestionsList[currentQuestionIndex];
+            let isCorrect = (selectedIndex === qData.correct);
+            userAnswers.push({
+                question: qData.q,
+                selected: qData.options[selectedIndex],
+                correctAnswer: qData.options[qData.correct],
+                isCorrect: isCorrect
+            });
+
+            currentQuestionIndex++;
+            if (currentQuestionIndex < activeQuestionsList.length) {
+                renderQuestion();
+            } else {
+                clearInterval(quizTimer);
+                finishQuiz(true);
+            }
+        }
+
+        function handleTimeOut() {
+            clearInterval(quizTimer);
+            document.getElementById('active-quiz-container').style.display = 'none';
+            let resContainer = document.getElementById('quiz-result-container');
+            resContainer.style.display = 'block';
+            resContainer.innerHTML = `
+                <div class="quiz-panel" style="text-align:center;">
+                    <h2 class="sub-options-title" style="color:var(--danger-red); margin-bottom:15px;">❌ انقضى الوقت المحدد!</h2>
+                    <p class="card-desc" style="font-size:1.1rem; margin-bottom:25px;">انتهى وقت الاختبار.</p>
+                    <button class="btn-main" onclick="resetQuizHub()">العودة للرئيسية</button>
+                </div>
+            `;
+        }
+
+        function finishQuiz(completedNormally) {
+            document.getElementById('active-quiz-container').style.display = 'none';
+            let resContainer = document.getElementById('quiz-result-container');
+            resContainer.style.display = 'block';
+
+            let correctCount = userAnswers.filter(a => a.isCorrect).length;
+            let totalCount = activeQuestionsList.length;
+            let percentage = Math.round((correctCount / totalCount) * 100);
+
+            let answersHTML = '';
+            userAnswers.forEach((ans, i) => {
+                answersHTML += `
+                    <div class="result-item">
+                        <strong>س${i+1}: ${ans.question}</strong><br>
+                        <span style="color:${ans.isCorrect ? 'var(--success-green)' : 'var(--danger-red)'};">
+                            إجابتك: ${ans.selected} ${ans.isCorrect ? '✓' : '✗'}
+                        </span>
+                        ${!ans.isCorrect ? `<br><span style="color:var(--success-green); font-size:0.85rem;">الإجابة الصحيحة: ${ans.correctAnswer}</span>` : ''}
+                    </div>
+                `;
+            });
+
+            resContainer.innerHTML = `
+                <div class="quiz-panel">
+                    <h2 class="sub-options-title" style="text-align:center; margin-bottom:10px;">ملخص نتيجة الاختبار</h2>
+                    <div style="text-align:center; margin-bottom:20px; font-size:1.2rem;">
+                        النتيجة النهائية: <strong style="color:var(--accent-blue);">${correctCount} من ${totalCount} (${percentage}%)</strong>
+                        <br><span style="font-size:1rem; color:var(--text-muted);">تم إتمام الاختبار بنجاح وعرض التقييم أدناه</span>
+                    </div>
+
+                    <div class="result-summary-card">
+                        <h3 style="margin-bottom:10px; color:var(--accent-blue);">بيانات المتقدم:</h3>
+                        <p><strong>الاسم:</strong> ${applicantInfo.name || 'غير متوفر'}</p>
+                        <p><strong>العمر:</strong> ${applicantInfo.age || 'غير متوفر'}</p>
+                        <p><strong>البلد:</strong> ${applicantInfo.country || 'غير متوفر'}</p>
+                        ${applicantInfo.scenario ? `<p style="margin-top:8px;"><strong>سيناريو الشخصية:</strong> ${applicantInfo.scenario}</p>` : ''}
+                        ${applicantInfo.prevAdmin ? `<p style="margin-top:8px;"><strong>خبرة سابقة:</strong> ${applicantInfo.prevAdmin}</p>` : ''}
+                    </div>
+
+                    <div class="result-summary-card" style="max-height: 300px; overflow-y: auto;">
+                        <h3 style="margin-bottom:10px; color:var(--accent-blue);">تفاصيل الإجابات:</h3>
+                        ${answersHTML}
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; gap:10px; margin-top:20px; flex-wrap:wrap;">
+                        <button class="btn-secondary" onclick="resetQuizHub()">إعادة المحاولة أو العودة</button>
+                        <button class="btn-main" onclick="downloadQuizReport(${correctCount}, ${totalCount}, ${percentage})">📥 تحميل تفاصيل الاختبار (TXT)</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function downloadQuizReport(correctCount, totalCount, percentage) {
+            let reportContent = `=== تقرير نتيجة اختبار QUIT MTA ===\n`;
+            reportContent += `نوع الاختبار: ${currentQuizType}\n`;
+            reportContent += `النتيجة: ${correctCount} من ${totalCount} (${percentage}%)\n\n`;
+            reportContent += `--- بيانات المتقدم ---\n`;
+            reportContent += `الاسم: ${applicantInfo.name || 'غير متوفر'}\n`;
+            reportContent += `العمر: ${applicantInfo.age || 'غير متوفر'}\n`;
+            reportContent += `البلد: ${applicantInfo.country || 'غير متوفر'}\n`;
+            if(applicantInfo.scenario) reportContent += `سيناريو الشخصية: ${applicantInfo.scenario}\n`;
+            if(applicantInfo.prevAdmin) reportContent += `خبرة سابقة: ${applicantInfo.prevAdmin}\n`;
+            if(applicantInfo.servers) reportContent += `السيرفرات السابقة: ${applicantInfo.servers}\n`;
+            if(applicantInfo.features) reportContent += `ما يميزه: ${applicantInfo.features}\n\n`;
+            
+            reportContent += `--- تفاصيل الإجابات ---\n`;
+            userAnswers.forEach((ans, i) => {
+                reportContent += `س${i+1}: ${ans.question}\n`;
+                reportContent += `إجابة المتقدم: ${ans.selected} [${ans.isCorrect ? 'صح ✓' : 'خطأ ✗'}]\n`;
+                if(!ans.isCorrect) {
+                    reportContent += `الإجابة الصحيحة: ${ans.correctAnswer}\n`;
+                }
+                reportContent += `-------------------------\n`;
+            });
+
+            let blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
+            let link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Quiz_Report_${applicantInfo.name || 'Applicant'}.txt`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function resetQuizHub() {
+            if (quizTimer) clearInterval(quizTimer);
+            document.getElementById('personal-info-container').style.display = 'none';
+            document.getElementById('active-quiz-container').style.display = 'none';
+            document.getElementById('quiz-result-container').style.display = 'none';
+            document.getElementById('admin-quiz-selector').style.display = 'none';
+            document.getElementById('quiz-main-selector').style.display = 'flex';
+        }
+
+        function filterAll() {
+            let query = document.getElementById('searchInput').value.toLowerCase();
+            let filteredRules = rulesData.filter(i => i.code.toLowerCase().includes(query) || i.name.toLowerCase().includes(query) || i.desc.toLowerCase().includes(query));
+            let filteredCmds = commandsData.filter(i => i.code.toLowerCase().includes(query) || i.name.toLowerCase().includes(query) || i.desc.toLowerCase().includes(query));
+            let filteredAdmins = adminData.filter(i => i.code.toLowerCase().includes(query) || i.name.toLowerCase().includes(query) || i.desc.toLowerCase().includes(query));
+            
+            renderGrid(filteredRules, 'rules-grid', false);
+            renderGrid(filteredCmds, 'commands-grid', true);
+            renderGrid(filteredAdmins, 'admin-grid', true);
+        }
+    </script>
+</body>
+</html>
